@@ -1,0 +1,32 @@
+parameters:
+    test: '%env(API_TOKEN)%'
+
+services:
+    _defaults:
+        autowire: true
+        bind:
+            string $apiToken: '%env(string:API_TOKEN)%'
+            string $bridgeIp: '%env(string:BRIDGE_IP)%'
+
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Model}'
+
+    Symfony\Component\HttpClient\CurlHttpClient: ~
+    Symfony\Contracts\HttpClient\HttpClientInterface: '@Symfony\Component\HttpClient\CurlHttpClient'
+
+    Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor: ~
+    Symfony\Component\Serializer\Normalizer\ObjectNormalizer:
+        - null
+        - null
+        - null
+        - '@Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor'
+    Symfony\Component\Serializer\Normalizer\ArrayDenormalizer: ~
+    Symfony\Component\Serializer\Encoder\JsonEncoder: ~
+    Symfony\Component\Serializer\Serializer:
+        - [ '@Symfony\Component\Serializer\Normalizer\ObjectNormalizer', '@Symfony\Component\Serializer\Normalizer\ArrayDenormalizer' ]
+        - [ '@Symfony\Component\Serializer\Encoder\JsonEncoder' ]
+    Symfony\Component\Serializer\SerializerInterface: '@Symfony\Component\Serializer\Serializer'
+
+    Symfony\Component\Console\Application:
+        public: true
